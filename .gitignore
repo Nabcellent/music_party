@@ -2,8 +2,9 @@
 *.log
 *.pot
 *.pyc
+.env
 __pycache__/
 local_settings.py
 /node_modules/
-.env
 /runConfigurations/
+webpack-stats.json

@@ -14,6 +14,7 @@ export default class Room extends Component {
             accessToken: null,
 
             spotifyAuthenticated: false,
+            player:null,
             song: {}
         }
 
@@ -72,12 +73,15 @@ export default class Room extends Component {
         axios.post(`/api/rooms/leave`).then(_response => {
             this.props.leaveRoomCallback()
             this.props.history.push('/')
+            this.state.player.disconnect();
         })
     }
 
     _showSettings = value => this.setState({showSettings: value})
 
     _renderRoom = () => {
+
+
         return (
             <Grid container spacing={2} style={{textAlign: 'center'}}>
                 <Grid item xs={12}>
@@ -85,7 +89,7 @@ export default class Room extends Component {
                 </Grid>
 
                 <Grid item xs={12}>
-                    <Player {...this.state.song}/>
+                    <Player {...this.state.song} player={this.state.player} isHost={this.state.isHost}/>
                 </Grid>
 
                 {
@@ -144,6 +148,7 @@ export default class Room extends Component {
                 getOAuthToken: cb => cb(token),
                 volume: 0.5
             });
+            this.setState({player: player})
 
             player.addListener('ready', ({device_id}) => {
                 const devices = data.devices;
@@ -190,6 +195,21 @@ export default class Room extends Component {
             document.getElementById('togglePlay').onclick = function () {
                 player.togglePlay();
             };
+
+            /*document.getElementById('toggleCurrentState').onclick = function() {
+                player.getCurrentState().then(state => {
+                    if (!state) {
+                        console.error('User is not playing music through the Web Playback SDK');
+                        return;
+                    }
+
+                    let current_track = state.track_window.current_track;
+                    let next_track = state.track_window.next_tracks[0];
+
+                    console.log('Currently Playing', current_track);
+                    console.log('Playing Next', next_track);
+                });
+            };*/
 
             player.connect();
         }

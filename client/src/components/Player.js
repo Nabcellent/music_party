@@ -24,18 +24,19 @@ export default function Player(props) {
                         <Typography color={'textSecondary'} variant={'subtitle1'}>{props.artist}</Typography>
 
                         <div>
-                            <Badge badgeContent={badgeCount} color="secondary">
-                                <IconButton onClick={() => _handleSkipSong(0)}><SkipPrevious/></IconButton>
-                            </Badge>
+                            <IconButton onClick={() => _handleSkipSong(0)}><SkipPrevious/></IconButton>
                             <IconButton id={'togglePlay'}>{props.is_playing ? <Pause/> : <PlayArrow/>}</IconButton>
-                            <Badge badgeContent={badgeCount} color="secondary">
-                                <IconButton onClick={() => _handleSkipSong(1)}><SkipNext/></IconButton>
-                            </Badge>
+                            <IconButton onClick={() => _handleSkipSong(1)}><SkipNext/></IconButton>
+                        </div>
+
+                        <div>
+                            <Badge badgeContent={'1/3'} color="secondary"/>
+                            <Typography display={'block'} color={'textSecondary'} variant={'caption'}>Votes to skip</Typography>
                         </div>
                     </Box>
                 </Grid>
             </Grid>
             <LinearProgress variant={'buffer'} value={songProgress} valueBuffer={buffer}/>
         </Card>
-    )
+)
 }

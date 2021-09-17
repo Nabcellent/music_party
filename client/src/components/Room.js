@@ -1,5 +1,5 @@
 import React, {Component} from "react";
-import {Button, Grid, Typography} from "@material-ui/core";
+import {Box, Button, Grid, Typography} from "@material-ui/core";
 import UpsertRoom from "./UpsertRoom";
 import Player from "./Player";
 
@@ -36,7 +36,8 @@ export default class Room extends Component {
                 this.setState({
                     votesToSkip: data.votes_to_skip,
                     guestCanPause: data.guest_can_pause,
-                    isHost: data.is_host
+                    isHost: data.isHost,
+                    accessToken: data.accessToken
                 })
 
                 if (this.state.isHost) this._authenticateSpotify();
@@ -46,7 +47,7 @@ export default class Room extends Component {
             }).catch(error => {
             this.props.leaveRoomCallback()
             this.props.history.push('/')
-            console.log(error)
+            console.log(`Unable to get room retails: ${error}`)
         })
     }
 
@@ -106,15 +107,15 @@ export default class Room extends Component {
         const {votesToSkip, guestCanPause} = this.state
 
         return (
-            <Grid container spacing={1} style={{textAlign: 'center'}}>
-                <Grid item xs={12}>
-                    <UpsertRoom update={true} votesToSkip={votesToSkip} guestCanPause={guestCanPause} roomCode={this.roomCode}
-                                updateCallback={this._getRoomDetails}/>
+            <Box component={'div'}>
+                <UpsertRoom update={true} votesToSkip={votesToSkip} guestCanPause={guestCanPause} roomCode={this.roomCode}
+                            updateCallback={this._getRoomDetails}/>
+                <Grid container spacing={1} style={{textAlign: 'center', paddingTop:'1rem'}}>
+                    <Grid item xs={12}>
+                        <Button color={'secondary'} variant={'contained'} size={'small'} onClick={() => this._showSettings(false)}>Close settings</Button>
+                    </Grid>
                 </Grid>
-                <Grid item xs={12}>
-                    <Button color={'secondary'} variant={'contained'} onClick={() => this._showSettings(false)}>Close settings</Button>
-                </Grid>
-            </Grid>
+            </Box>
         )
     }
 
@@ -129,11 +130,11 @@ export default class Room extends Component {
             if (!data.status)
                 axios.get('/spotify/get-auth-url').then(response => window.location.replace(response.data.url))
 
-            this.setState({spotifyAuthenticated: data.status, accessToken: data.accessToken})
+            this.setState({spotifyAuthenticated: data.status})
         })
     }
 
-    _play = (tracks) => {
+    _play = (data) => {
         loadScript('https://sdk.scdn.co/spotify-player.js')
 
         window.onSpotifyWebPlaybackSDKReady = () => {
@@ -145,32 +146,28 @@ export default class Room extends Component {
             });
 
             player.addListener('ready', ({device_id}) => {
-                const play = ({
-                                  spotify_uri,
-                                  playerInstance: {
-                                      _options: {
-                                          getOAuthToken
-                                      }
-                                  }
-                              }) => {
+                const devices = data.devices;
+
+                if (devices.indexOf(device_id) === -1) devices.push(device_id)
+
+                const play = ({spotify_uri, playerInstance: {_options: {getOAuthToken}}}) => {
                     getOAuthToken(access_token => {
-                        fetch(`https://api.spotify.com/v1/me/player/play?device_id=${device_id}`, {
-                            method: 'PUT',
-                            body: JSON.stringify({
-                                uris: spotify_uri
-                            }),
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${access_token}`
-                            },
-                        });
+                        devices.forEach(device => {
+                            fetch(`https://api.spotify.com/v1/me/player/play?device_id=${device}`, {
+                                method: 'PUT',
+                                body: JSON.stringify({
+                                    uris: spotify_uri
+                                }),
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${access_token}`
+                                },
+                            }).then(() => null);
+                        })
                     });
                 };
 
-                play({
-                    playerInstance: player,
-                    spotify_uri: tracks
-                });
+                play({playerInstance: player, spotify_uri: data.tracks})
             });
 
             // Not Ready

@@ -39,8 +39,8 @@ def is_authenticated(session_key):
         if token.expires_in <= timezone.now():
             refresh_token(session_key)
 
-        return {'status': True, 'accessToken': token.access_token}
-    return {'status': False}
+        return True
+    return False
 
 
 def refresh_token(session_key):
@@ -84,5 +84,7 @@ def play_pause_song(session_key, play=True):
     return execute_api_request(session_key, endpoint, put_=True)
 
 
-def skip_song(session_key):
-    return execute_api_request(session_key, 'player/next', post_=True)
+def skip_song(session_key, skip):
+    endpoint = 'player/' + ('next' if skip == 1 else 'previous')
+
+    return execute_api_request(session_key, endpoint, post_=True)

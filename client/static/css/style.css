@@ -40,6 +40,7 @@ html, body {
     z-index: -1;
     overflow: hidden;
 }
+
 .background > i {
     position: absolute;
     z-index: -1;
@@ -51,10 +52,12 @@ html, body {
     display: flex !important;
     justify-content: center;
 }
+
 .cloud-c1 {
     fill: var(--party-c1);
     opacity: .1;
 }
+
 .cloud-c2 {
     fill: var(--party-c2);
 }
@@ -71,4 +74,12 @@ code {
     padding: .7rem;
     font-size: small;
     color: lightblue;
+}
+
+
+@media (max-width: 767.98px) {
+    #app {
+        width: 100%;
+        padding: 1.7rem;
+    }
 }

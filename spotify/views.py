@@ -12,8 +12,9 @@ from spotify.utils import *
 # Create your views here.
 class AuthURL(APIView):
     def get(self, request):
-        scopes = 'user-read-playback-state user-modify-playback-state user-read-currently-playing playlist-read-collaborative user-top-read ' \
-                 'streaming user-library-read'
+        scopes = 'user-read-playback-state user-modify-playback-state user-read-currently-playing user-top-read ' \
+                 'user-library-read playlist-modify-public playlist-read-collaborative user-read-playback-position ' \
+                 'user-read-recently-played user-top-read user-follow-read streaming'
 
         url = Request('GET', 'https://accounts.spotify.com/authorize', params={
             'scope': scopes,
@@ -54,7 +55,7 @@ class IsAuthenticated(APIView):
     def get(self, request):
         user_is_authenticated = is_authenticated(self.request.session.session_key)
 
-        return Response(user_is_authenticated, status=status.HTTP_200_OK)
+        return Response({'status': user_is_authenticated}, status=status.HTTP_200_OK)
 
 
 class CurrentSong(APIView):
@@ -120,6 +121,7 @@ class SavedTracks(APIView):
         else:
             return Response({}, status=status.HTTP_404_NOT_FOUND)
 
+        # FETCH TRACKS
         endpoint = 'tracks?market=KE'
         response = execute_api_request(room.host, endpoint)
 
@@ -131,7 +133,20 @@ class SavedTracks(APIView):
         for item in response.get('items'):
             tracks.append(item.get('track').get('uri'))
 
-        return Response(tracks, status=status.HTTP_200_OK)
+        # FETCH DEVICES
+        endpoint = 'player/devices'
+        response = execute_api_request(room.host, endpoint)
+
+        if 'error' in response or 'devices' not in response:
+            return Response({}, status=status.HTTP_204_NO_CONTENT)
+
+        devices = []
+
+        for item in response.get('devices'):
+            if not item.get('is_restricted'):
+                devices.append(item.get('id'))
+
+        return Response({'tracks': tracks, 'devices': devices}, status=status.HTTP_200_OK)
 
 
 class PlayPauseSong(APIView):
@@ -159,9 +174,11 @@ class SkipSong(APIView):
             votes = Vote.objects.filter(room=room, song_id=room.current_song)
             votes_needed = room.votes_to_skip
 
-            if self.request.session.session_key == room.host or len(votes) + 1 >= votes_needed:
+            skip = request.data.get('skip')
+
+            if self.request.session.session_key == room.host or len(votes) + 1 >= votes_needed or skip == 0:
                 votes.delete()
-                skip_song(room.host)
+                skip_song(room.host, skip)
             else:
                 vote = Vote(user=self.request.session.session_key, room=room, song_id=room.current_song)
                 vote.save()

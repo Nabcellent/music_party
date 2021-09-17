@@ -1,9 +1,9 @@
 import React, {useState, useEffect} from "react";
 import {Badge, Box, Card, Grid, IconButton, LinearProgress, Typography} from "@material-ui/core";
-import {Pause, PlayArrow, SkipNext} from "@material-ui/icons";
+import {Pause, PlayArrow, SkipNext, SkipPrevious} from "@material-ui/icons";
 
 export default function Player(props) {
-    const _handleSkipSong = () => axios.post('/spotify/skip').then(() => null, err => console.log(err))
+    const _handleSkipSong = (skip) => axios.post('/spotify/skip', {skip}).then(() => null, err => console.log(err))
 
     const songProgress = (props.time / props.duration) * 100
 
@@ -24,9 +24,12 @@ export default function Player(props) {
                         <Typography color={'textSecondary'} variant={'subtitle1'}>{props.artist}</Typography>
 
                         <div>
+                            <Badge badgeContent={badgeCount} color="secondary">
+                                <IconButton onClick={() => _handleSkipSong(0)}><SkipPrevious/></IconButton>
+                            </Badge>
                             <IconButton id={'togglePlay'}>{props.is_playing ? <Pause/> : <PlayArrow/>}</IconButton>
                             <Badge badgeContent={badgeCount} color="secondary">
-                                <IconButton onClick={_handleSkipSong}><SkipNext/></IconButton>
+                                <IconButton onClick={() => _handleSkipSong(1)}><SkipNext/></IconButton>
                             </Badge>
                         </div>
                     </Box>

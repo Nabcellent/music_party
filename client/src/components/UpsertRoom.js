@@ -83,7 +83,7 @@ export default class UpsertRoom extends Component {
     _renderUpdateButtons = () => {
         return (
             <Grid item xs={12} align={'center'}>
-                <Button color={'primary'} variant={'contained'} onClick={this._handleUpdateRoom}>Update Room</Button>
+                <Button color={'primary'} variant={'contained'} size={'small'} onClick={this._handleUpdateRoom}>Update Room</Button>
             </Grid>
         )
     }

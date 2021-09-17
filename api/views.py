@@ -8,6 +8,9 @@ from api.serializers import RoomSerializer, CreateRoomSerializer, UpdateRoomSeri
 
 
 # Create your views here.
+from spotify.models import SpotifyToken
+
+
 class RoomView(generics.ListAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
@@ -25,7 +28,12 @@ class GetRoom(APIView):
 
             if room.exists():
                 data = RoomSerializer(room.first()).data
-                data['is_host'] = self.request.session.session_key == room.first().host
+                data['isHost'] = self.request.session.session_key == room.first().host
+
+                user_tokens = SpotifyToken.objects.filter(user=data.get('host'))
+
+                if user_tokens.exists():
+                    data['accessToken'] = user_tokens.first().access_token
 
                 return Response(data, status=status.HTTP_200_OK)
             return Response({'Room not found': 'Invalid room code'}, status=status.HTTP_404_NOT_FOUND)

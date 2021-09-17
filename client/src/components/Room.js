@@ -2,6 +2,7 @@ import React, {Component} from "react";
 import {Box, Button, Grid, Typography} from "@material-ui/core";
 import UpsertRoom from "./UpsertRoom";
 import Player from "./Player";
+import {toast} from "react-toastify";
 
 export default class Room extends Component {
     constructor(props) {
@@ -14,7 +15,7 @@ export default class Room extends Component {
             accessToken: null,
 
             spotifyAuthenticated: false,
-            player:null,
+            player: null,
             song: {}
         }
 
@@ -112,9 +113,10 @@ export default class Room extends Component {
             <Box component={'div'}>
                 <UpsertRoom update={true} votesToSkip={votesToSkip} guestCanPause={guestCanPause} roomCode={this.roomCode}
                             updateCallback={this._getRoomDetails}/>
-                <Grid container spacing={1} style={{textAlign: 'center', paddingTop:'1rem'}}>
+                <Grid container spacing={1} style={{textAlign: 'center', paddingTop: '1rem'}}>
                     <Grid item xs={12}>
-                        <Button color={'secondary'} variant={'contained'} size={'small'} onClick={() => this._showSettings(false)}>Close settings</Button>
+                        <Button color={'secondary'} variant={'contained'} size={'small'} onClick={() => this._showSettings(false)}>Close
+                            settings</Button>
                     </Grid>
                 </Grid>
             </Box>
@@ -149,31 +151,22 @@ export default class Room extends Component {
             this.setState({player: player})
 
             player.addListener('ready', ({device_id}) => {
-                const devices = data.devices;
-
-                if (devices.indexOf(device_id) === -1) devices.push(device_id)
-
                 const play = ({spotify_uri, playerInstance: {_options: {getOAuthToken}}}) => {
                     getOAuthToken(access_token => {
-                        devices.forEach(device => {
-                            fetch(`https://api.spotify.com/v1/me/player/play?device_id=${device}`, {
-                                method: 'PUT',
-                                body: JSON.stringify({
-                                    uris: spotify_uri
-                                }),
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${access_token}`
-                                },
-                            }).then(() => null);
-                        })
+                        fetch(`https://api.spotify.com/v1/me/player/play?device_id=${device_id}`, {
+                            method: 'PUT',
+                            body: JSON.stringify({ uris: spotify_uri }),
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${access_token}`
+                            },
+                        }).then(() => null);
                     });
                 };
 
                 play({playerInstance: player, spotify_uri: data.tracks})
             });
 
-            // Not Ready
             player.addListener('not_ready', ({device_id}) => {
                 console.log('Device ID has gone offline', device_id);
             });
@@ -183,10 +176,13 @@ export default class Room extends Component {
             });
 
             player.addListener('authentication_error', ({message}) => {
+                toast.error('Spotify player Authentication error... !😕')
                 console.error(message);
             });
 
             player.addListener('account_error', ({message}) => {
+                this._handleLeaveRoom()
+                toast.error('Spotify player Account error... !😕')
                 console.error(message);
             });
 

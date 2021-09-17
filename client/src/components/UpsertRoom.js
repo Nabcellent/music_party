@@ -59,9 +59,7 @@ export default class UpsertRoom extends Component {
             toast.success("Room updated successfully !");
 
             this.props.updateCallback()
-        }).catch(() => {
-            toast.error('Error updating room... !')
-        });
+        }).catch(() => toast.error('Error updating room... !'));
     }
 
     _renderCreateButtons = () => {

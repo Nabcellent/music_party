@@ -1,0 +1,74 @@
+@import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
+
+:root {
+    --party-c1: rgba(10, 170, 250, .8);
+    --party-c2: #FBFCF3
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    text-decoration: none;
+    font-family: "Varela Round", cursive !important;
+}
+
+html, body {
+    height: 100%;
+    /*color: #fff;*/
+}
+
+#main {
+    height: 100vh;
+    width: 100vw;
+}
+
+#app {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.background {
+    pointer-events: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+.background > i {
+    position: absolute;
+    z-index: -1;
+    display: block;
+}
+
+.bg-clouds {
+    width: 100%;
+    display: flex !important;
+    justify-content: center;
+}
+.cloud-c1 {
+    fill: var(--party-c1);
+    opacity: .1;
+}
+.cloud-c2 {
+    fill: var(--party-c2);
+}
+
+code {
+    color: crimson;
+    background-color: #f1f1f1;
+}
+
+.signature {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    padding: .7rem;
+    font-size: small;
+    color: lightblue;
+}

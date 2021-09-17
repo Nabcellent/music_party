@@ -27,6 +27,7 @@ export default class Room extends Component {
 
     componentWillUnmount() {
         clearInterval(this.interval)
+        this.state.player.disconnect();
     }
 
     _getRoomDetails = () => {
@@ -73,15 +74,12 @@ export default class Room extends Component {
         axios.post(`/api/rooms/leave`).then(_response => {
             this.props.leaveRoomCallback()
             this.props.history.push('/')
-            this.state.player.disconnect();
         })
     }
 
     _showSettings = value => this.setState({showSettings: value})
 
     _renderRoom = () => {
-
-
         return (
             <Grid container spacing={2} style={{textAlign: 'center'}}>
                 <Grid item xs={12}>
